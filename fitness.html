@@ -33,12 +33,30 @@
 									<li><a href="#" class="sex">Female</a></li>
 								</ul>
 							</div>
+							<div class="btn-group">
+								<button type="button" class="btn-default btn col-md-1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<span class="body-label">Body</span>
+									<span class="caret"></span>
+									<span class="sr-only">Toggle Dropdown</span>
+								</button>
+								<ul class="dropdown-menu">
+									<li><a href="#" class="body">Thin</a></li>
+									<li><a href="#" class="body">Regular</a></li>
+									<li><a href="#" class="body">Stocky</a></li>
+								</ul>
+							</div>
 						</div>
 						<div class="form-group">
 							<div class="col-xs-11">
 							  <input type="text" class="form-control height" placeholder="Height">
 							</div>
 							<label class="col-xs-1 control-label">cm</label>
+						</div>
+						<div class="form-group">
+							<div class="col-xs-11">
+							  <input type="text" class="form-control age" placeholder="Age">
+							</div>
+							<label class="col-xs-1 control-label">years</label>
 						</div>
 						<div class="form-group">
 							<div class="col-xs-11">
@@ -75,6 +93,30 @@
 							<td class="weight-lorentz"></td>
 						</tr>
 						<tr class="danger">
+							<th>Hamwi:</th>
+							<td class="weight-hamwi"></td>
+						</tr>
+						<tr class="success">
+							<th>Devine:</th>
+							<td class="weight-devine"></td>
+						</tr>
+						<tr class="warning">
+							<th>Robinson:</th>
+							<td class="weight-robinson"></td>
+						</tr>
+						<tr class="info">
+							<th>Miller:</th>
+							<td class="weight-miller"></td>
+						</tr>
+						<tr class="active">
+							<th>Lemmens:</th>
+							<td class="weight-lemmens"></td>
+						</tr>
+						<tr class="danger">
+							<th>Creff:</th>
+							<td class="weight-creff"></td>
+						</tr>
+						<tr>
 							<th>Average:</th>
 							<td class="weight-average"></td>
 						</tr>
@@ -90,14 +132,18 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 		<script>
 			var sex = null;
+			var body = null;
 			var height = 0;
+			var age = 0;
 			var weight = 0;
 			var bmi = null;
+			var inch = 0.393700787;
 			var calculations = {
 				broc: null,
 				brugsh: null,
 				potton: null,
-				lorentz: null
+				lorentz: null,
+				creff: null
 			};
 			var weightBroc = function() {
 				if (sex === "Female") return (height - 100) * 0.85;
@@ -116,6 +162,37 @@
 				if (sex === "Female") return height - 100 - (height - 150) * 0.5;
 				if (sex === "Male") return height - 100 - (height - 150) * 0.25;
 			};
+			var weightHamwi = function() {
+				var hinches = height * inch;
+				if (sex === "Female") return 45.5 + ((hinches - 60) * 2.2);
+				if (sex === "Male") return 48 + ((hinches - 60) * 2.7);
+			};
+			var weightDevine = function() {
+				var hinches = height * inch;
+				if (sex === "Female") return 45.5 + ((hinches - 60) * 2.3);
+				if (sex === "Male") return 50 + ((hinches - 60) * 2.3);
+			};
+			var weightRobinson = function() {
+				var hinches = height * inch;
+				if (sex === "Female") return 49 + ((hinches - 60) * 1.7);
+				if (sex === "Male") return 52 + ((hinches - 60) * 1.9);
+			};
+			var weightMiller = function() {
+				var hinches = height * inch;
+				if (sex === "Female") return 53.1 + ((hinches - 60) * 1.36);
+				if (sex === "Male") return 56.2 + ((hinches - 60) * 1.41);
+			};
+			var weightLemmens = function() {
+				return 22 * (height / 100) * (height / 100);
+			};
+			var weightCreff = function() {
+				var multiplier = {
+					"Thin": 0.9,
+					"Regular": 1,
+					"Stocky": 1.1
+				};
+				return (height - 100 + age / 10) * 0.9 * multiplier[body];
+			};
 			var calculateWeights = function() {
 				if (height > 0) {
 					if (sex !== null) {
@@ -123,6 +200,14 @@
 						calculations.brugsh = weightBrugsh();
 						calculations.potton = weightPotton();
 						calculations.lorentz = weightLorentz();
+						calculations.hamwi = weightHamwi();
+						calculations.devine = weightDevine();
+						calculations.robinson = weightRobinson();
+						calculations.miller = weightMiller();
+						calculations.lemmens = weightLemmens();
+					}
+					if (body !== null && age > 0) {
+						calculations.creff = weightCreff();
 					}
 					if (weight > 0) {
 						bmi = weight / Math.pow(height / 100, 2);
@@ -135,9 +220,12 @@
 				Object.keys(calculations).forEach(function(key) {
 					$('.weight-' + key).text(calculations[key] ? (calculations[key].toFixed(2) + " kg") : "");
 				});
-				var average = (Object.values(calculations).reduce(function(memo, value) {
+				var values = Object.values(calculations).filter(function(value) {
+					return !!value;
+				});
+				var average = (values.reduce(function(memo, value) {
 					return memo + (value || 0);
-				}, 0) / Object.values(calculations).length).toFixed(2);
+				}, 0) / values.length).toFixed(2);
 				$(".weight-average").text(average > 0 ? (average + " kg") : "");
 			};
 			$(function() {
@@ -146,9 +234,19 @@
 					$(".sex-label").text(event.target.innerText);
 					calculateWeights();
 				});
+				$(".body").on("click", function(event) {
+					body = event.target.innerText;
+					$(".body-label").text(event.target.innerText);
+					calculateWeights();
+				});
 				$(".height").on("keyup", function(event) {
 					height = parseFloat(event.target.value);
 					if (isNaN(height)) height = 0;
+					calculateWeights();
+				});
+				$(".age").on("keyup", function(event) {
+					age = parseFloat(event.target.value);
+					if (isNaN(age)) age = 0;
 					calculateWeights();
 				});
 				$(".weight").on("keyup", function(event) {
