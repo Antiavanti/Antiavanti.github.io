@@ -17,9 +17,15 @@ form {
   border-bottom: 1px solid silver;
 }
 
+.flex {
+  display: -ms-flexbox;
+  display: flex;
+}
+
 .column {
   width: 250px;
-  float: left;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
   padding-right: 0.5em;
   margin-right: 0.5em;
   border-right: 1px solid silver;
